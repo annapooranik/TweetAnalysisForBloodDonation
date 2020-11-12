@@ -31,9 +31,9 @@ object DonateBlood {
     // Get rid of log spam (should be called after the context is set up)
     setupLogging()
     
-    //Create a  the filter keywords to pass as arguments while creating twitter stream
+    //Create a list of filter keywords to pass as arguments while creating twitter stream
     
-     val filters = Seq("blood","plasma", "#blood", "#bloodrequired","#BloodMatters","#BloodDrive","#DonateBlood","#Blood","#NeedBlood")
+     val filters = List("blood","plasma", "#blood", "#bloodrequired","#BloodMatters","#BloodDrive","#DonateBlood","#Blood","#NeedBlood")
      
     // Create a DStream from Twitter using the Spark streaming context and the filters
     // Note: We are passing 'None' as Twitter4J authentication because 
@@ -49,7 +49,7 @@ object DonateBlood {
         val text = status.getText
         val location = status.getUser.getLocation
         val retweet = status.isRetweet()
-        
+      
         //For extracting hashtags, create a list of words by splitting the text of the status using ' '(space) and then filter 
         //only the words that start with #
         val hashtags = status.getText.split(" ").toList.filter(word => word.startsWith("#"))
@@ -67,13 +67,14 @@ object DonateBlood {
          
       import spark.implicits._
       
-      // Don't bother with empty batches
+      // Filter out empty batches
       if (rdd.count() > 0) {
-   
+       //Convert rdd to Dataframe
        val requestsDataFrame = rdd.toDF("id","date","user","text","location","retweet","hashtags")
 
        val bloodDonateTweets =  requestsDataFrame.filter(col("text").contains("urgent") || col("text").contains("need") || col("text").contains("emergency") || col("text").contains("required")).dropDuplicates("text")
 
+        // Filter out empty batches
        if (bloodDonateTweets.count() > 0)
        {
       //Create a SQL table from this DataFrame
@@ -88,8 +89,7 @@ object DonateBlood {
       }
     })
     
-    // Set a checkpoint directory, and kick it all off
-    
+    // Set a checkpoint directory
     ssc.checkpoint("C:/checkpoint/")
     ssc.start()
     ssc.awaitTermination()
