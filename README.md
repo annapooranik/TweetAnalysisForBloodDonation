@@ -9,4 +9,4 @@ The second set of filter acts to filtered tweets to look for words like urgent, 
 
 Later, we extract the hashtags used for twitter status related to urgent blood donation requirements.
 
-A complete explanation of my code can be found at my medium page here : <link to be added>
+A complete explanation of my code can be found at my medium page here : https://medium.com/@annapoorani.k/finding-the-urgent-blood-plasma-requirements-on-twitter-using-spark-streaming-959ebb6f5590
